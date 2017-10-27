@@ -507,7 +507,7 @@ def addToGenomicGff(inputGff,genomicGff):
 #counts the amount of unique features in each category
 #generates a table that compares the original feature counts to the counts in the final output
 def makeTransferStats(originalGFF, newGFF):
-    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","gap","start_codon","stop_codon","biological_region","total"]
+    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","gap","total"]
     origCounts = countUniqueOccurences(originalGFF,nameArray)
     finalCounts = countUniqueOccurences(newGFF,nameArray)
     writeStatsToFile(origCounts,finalCounts, nameArray)
