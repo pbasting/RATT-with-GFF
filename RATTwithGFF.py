@@ -17,9 +17,9 @@ def main():
 
     if (validArgs(gffFileName, fastaFileName, queryFastaFile, rattType)):
         #ensures end of line is LF not CRLF
-        subprocess.call(["sed", "-i","s/\r$//",gff])
-        subprocess.call(["sed", "-i","s/\r$//",fasta1])
-        subprocess.call(["sed", "-i","s/\r$//",fasta2])
+        subprocess.call(["sed", "-i","s/\r$//",gffFileName])
+        subprocess.call(["sed", "-i","s/\r$//",fastaFileName])
+        subprocess.call(["sed", "-i","s/\r$//",queryFastaFile])
 
         splitGenomicFiles(gffFileName, fastaFileName, contigs)
         gffsToEmbls(contigs)
