@@ -18,6 +18,7 @@ The European Molecular Biology Open Software Suite (EMBOSS)
   - http://emboss.open-bio.org/html/adm/ch01s01.html
   
 ## USAGE:
+Requires all files be in the same directory that you are running the script from
 
 > ./RATTwithGFF.py  [reference-GFF] [reference-FASTA] [query-FASTA] [run-ID]  [RATT-Transfer-Type]
 
@@ -35,3 +36,15 @@ The European Molecular Biology Open Software Suite (EMBOSS)
   
 ### EXAMPLE
 > ./RATTwithGFF.py ref.gff ref.fasta query.fasta refToQuery Strain
+
+## OUTPUT:
+**contig_fasta:** contains the reference sequence split into separate fasta files for each contig/chromosome
+
+**contig_gff:** contains the reference annotations split into seperate gff files for each contig/chromosome
+
+**contig_embl:** contains the annotations for each reference contig/chromosome as an EMBL file
+
+**[run-ID]_RATT:** contains the RATT output files organized into subdirectories
+- **final_embl** contains the RATT transferred annotations in EMBL format for each query contig/chromosome
+- **final_gff** contains the RATT transferred annotation in GFF format for each query contig/chromosome as well as a genomic gff
+- **transferStats.csv** comma-delimited file containing the unique feature counts and differences between the reference gff and the output gff
