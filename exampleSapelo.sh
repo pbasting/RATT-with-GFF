@@ -2,7 +2,7 @@
 #PBS -q batch
 #PBS -N RATT_pipeline
 #PBS -l nodes=1:ppn=1:AMD
-#PBS -l mem=10gb
+#PBS -l mem=4gb
 #PBS -l walltime=00:15:00
 
 
