@@ -77,7 +77,7 @@ def fixLineEndings(fileName):
                 else:
                     newLine = line    
                 outFile.write(newLine)
-    return outFile
+    return newFileName
 
 
 
