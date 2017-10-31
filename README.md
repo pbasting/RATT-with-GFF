@@ -17,6 +17,9 @@ Rapid Annotation Transfer Tool(RATT) (and all prerequisites)
 The European Molecular Biology Open Software Suite (EMBOSS)
   - http://emboss.open-bio.org/html/adm/ch01s01.html
   
+Quality Assesment Tools for Genome Assemblies (QUAST)
+ - http://bioinf.spbau.ru/en/quast
+  
 ## USAGE:
 Requires all files be in the same directory that you are running the script from
 
@@ -47,4 +50,4 @@ Requires all files be in the same directory that you are running the script from
 **[run-ID]_RATT:** contains the RATT output files organized into subdirectories
 - **final_embl** contains the RATT transferred annotations in EMBL format for each query contig/chromosome
 - **final_gff** contains the RATT transferred annotation in GFF format for each query contig/chromosome as well as a genomic gff
-- **transferStats.csv** comma-delimited file containing the unique feature counts and differences between the reference gff and the output gff
+- **transferStats.csv** comma-delimited file containing the unique feature counts for the reference GFF and newly generated GFF. Also contains statistics related to to the quality of the assembly.
