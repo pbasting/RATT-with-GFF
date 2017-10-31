@@ -1,9 +1,11 @@
 # RATT-with-GFF
-Pipeline for Rapid Annotation Transfer Tool (RATT) when your starting annotation file is a GFF. 
+RATT-with-GFF enables Rapid Annotation Transfer Tool (RATT) to be used with a GFF as your annotation file. 
 
-Utlilizes GFF to EMBL conversion tools and corrects for errors that occur during conversion.
+RATT is a great tool for transferring annotations from one genome to another, but requires the annotations be in EMBL format. 
 
-Designed and tested with Linux operating systems.
+This pipeline is designed to use existing file conversion tools in order to run RATT with GFF annotations files with minimal information loss
+
+This pipeline was designed for use on linux operating systems.
 
 ## PREREQUISITE:
 
