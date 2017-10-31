@@ -21,6 +21,9 @@ The European Molecular Biology Open Software Suite (EMBOSS)
   
 Quality Assesment Tools for Genome Assemblies (QUAST)
  - http://bioinf.spbau.ru/en/quast
+ 
+#### NOTE FOR UGA USERS:
+As of 10/31/17, the Sapelo cluster already has all of these dependencies installed except EMBLmyGFF3. You can install EMBLmyGFF3 locally and add the directory to your path on sapelo. You will also need to add QUAST "/usr/local/apps/quast/4.5/quast.py" to your path.
   
 ## USAGE:
 Requires all files be in the same directory that you are running the script from
