@@ -16,17 +16,22 @@ def main():
     contigs = []
 
     if (validArgs(gffFileName, fastaFileName, queryFastaFile, rattType)):
+        
         #ensures end of line is LF not CRLF
-        subprocess.call(["sed", "-i","s/\r$//",gffFileName])
-        subprocess.call(["sed", "-i","s/\r$//",fastaFileName])
-        subprocess.call(["sed", "-i","s/\r$//",queryFastaFile])
+        #creates temp files with correct line endings
+        gffFileName = fixLineEndings(gffFileName)
+        fastaFileName = fixLineEndings(fastaFileName)
+        queryFastaFile = fixLineEndings(queryFastaFile)
 
         splitGenomicFiles(gffFileName, fastaFileName, contigs)
         gffsToEmbls(contigs)
+        
         global ratt_dir 
         ratt_dir = sampleID+"_RATT" #this is the directory that the ratt results will be stored
-        runRatt(queryFastaFile, sampleID, rattType)
+        
+        runRatt(fastaFileName,queryFastaFile, sampleID, rattType)
         processRattResults(gffFileName)
+        subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
     else:
         return 0
 
@@ -59,7 +64,21 @@ def validArgs(gff, fasta1, fasta2, transType):
         return True
     else:
         return False
-    
+
+def fixLineEndings(fileName):
+    newFileName = "temp_"+fileName
+    with open(newFileName,"wb") as outFile:
+        with open(fileName) as file:
+            for line in file:
+                if line.find("\r") != -1:
+                    newLine = line.replace("\r","")
+                else:
+                    newLine = line    
+                outFile.write(newLine)
+    return outFile
+
+
+
 #converts a genomic gff into seperate gffs for each contig
 #converts a genoic fasta into a fasta for each contig
 #called by main
@@ -205,9 +224,11 @@ def cleanEmbl(contig):
 #calls the RATT script to transfer the annotations
 #also creates directories to organize the RATT output files
 #called by main
-def runRatt(queryFa, sampleID, parameter):
+def runRatt(subFa,queryFa, sampleID, parameter):
     print "***RUNNING RATT....."
     subprocess.call(["mkdir",ratt_dir]) #makes directory where the ratt results are stored
+    subprocess.call(["quast.py","-o",ratt_dir+"/ref_quast","--fast","-s","--silent",subFa])
+    subprocess.call(["quast.py","-o",ratt_dir+"/query_quast","--fast","-s","--silent",queryFa])
     subprocess.call(["start.ratt.sh","../contig_embl","../"+queryFa, sampleID, parameter],cwd=ratt_dir)
     subprocess.call(["mkdir","final_embl","Report_gff","Report_txt","NOTTransfered_embl","nucmer","tmp2_embl","uncorrected_embl","final_gff"],cwd=ratt_dir)
     subprocess.call(["mv *.final.embl final_embl"], shell=True, cwd=ratt_dir)
@@ -507,7 +528,7 @@ def addToGenomicGff(inputGff,genomicGff):
 #counts the amount of unique features in each category
 #generates a table that compares the original feature counts to the counts in the final output
 def makeTransferStats(originalGFF, newGFF):
-    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","gap","total"]
+    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","gap","total features"]
     origCounts = countUniqueOccurences(originalGFF,nameArray)
     finalCounts = countUniqueOccurences(newGFF,nameArray)
     writeStatsToFile(origCounts,finalCounts, nameArray)
@@ -528,19 +549,37 @@ def countUniqueOccurences(gff, names):
         sortedUniqueIDs[len(sortedUniqueIDs)-1].add(x) #generates a set with unqiue values that equal the total
     return sortedUniqueIDs
 
+def parseQuast(results):
+    row = []
+    table = []
+    with open(results) as file:
+        for line in file:
+            row = line.split("\t")
+            row[2] = row[2][:len(row[2])-1]
+            table.append(row)
+    return table
+    
 #writes out the unique feature count data as a comma-delimited file
 def writeStatsToFile(oCounts,fCounts, names):
+    refQuastResults = parseQuast(ratt_dir+"/ref_quast/report.tsv")
+    queryQuastResults = parseQuast(ratt_dir+"/query_quast/report.tsv")
     with open(ratt_dir+"/transferStats.csv","w") as file:
-        file.write("Feat.,Orig.,Final,Dif\n")
+        file.write("Feat.,Orig.,Final\n")
         for x in range(0,len(names)):
             file.write(names[x])
             file.write(",")
             file.write(str(len(oCounts[x])))
             file.write(",")
             file.write(str(len(fCounts[x])))
-            file.write(",")
-            file.write(str(len(fCounts[x]) - len(oCounts[x])))
+            #file.write(",")
+            #file.write(str(len(fCounts[x]) - len(oCounts[x])))
             file.write("\n")
+        file.write("Assembly Length,"+refQuastResults[15][1]+","+queryQuastResults[15][1]+"\n")
+        file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+        file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
+        file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
+        file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
+        file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
 
 main()
 
