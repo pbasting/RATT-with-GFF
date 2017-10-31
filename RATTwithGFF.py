@@ -65,6 +65,8 @@ def validArgs(gff, fasta1, fasta2, transType):
     else:
         return False
 
+#checks line ending format
+#creates a temp file with LF line endings
 def fixLineEndings(fileName):
     newFileName = "temp_"+fileName
     with open(newFileName,"wb") as outFile:
@@ -549,6 +551,7 @@ def countUniqueOccurences(gff, names):
         sortedUniqueIDs[len(sortedUniqueIDs)-1].add(x) #generates a set with unqiue values that equal the total
     return sortedUniqueIDs
 
+#converts tab-delimited quast report into a 2d list
 def parseQuast(results):
     row = []
     table = []
