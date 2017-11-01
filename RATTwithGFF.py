@@ -2,8 +2,10 @@
 
 import subprocess
 import sys
+import timeit
 
 def main():
+    startTime = timeit.default_timer()
     if (len(sys.argv) != 6):
         sys.stderr.write('USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>\n')
         return
@@ -32,6 +34,8 @@ def main():
         runRatt(fastaFileName,queryFastaFile, sampleID, rattType)
         processRattResults(gffFileName)
         subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
+        elapsedTime = (timeit.default_timer() - startTime)/60
+        print("<RATTwithGFF.py> COMPLETE in "+format(elapsedTime,'.2f')+" minutes")
     else:
         return 0
 
@@ -467,6 +471,7 @@ def removeAttribute(line, attribute):
     else:
         return line
 
+#replaces ncrna_class with ncRNA_class
 def fixNcRNAClass(line):
     if line.find("ncrna_class=") != 0:
         newLine = line[:line.find("ncrna_class=")]+"ncRNA_class="
@@ -478,7 +483,6 @@ def cleanAttributes(lines):
     for line in lines:
         if (len(line) == 9):
             line[8] = removeAttribute(line[8],"locus_tag")
-            #while (line[8].find("note=") != -1): #removes all notes
             line[8] = removeAttribute(line[8],"note=")
             line[8] = removeAttribute(line[8],"transl_table")
             line[8] = removeAttribute(line[8],"codon_start")
@@ -583,12 +587,11 @@ def writeStatsToFile(oCounts,fCounts, names):
             file.write(str(len(oCounts[x])))
             file.write(",")
             file.write(str(len(fCounts[x])))
-            #file.write(",")
-            #file.write(str(len(fCounts[x]) - len(oCounts[x])))
             file.write("\n")
         
         file.write("Assembly Length,"+refQuastResults[15][1]+","+queryQuastResults[15][1]+"\n")
 
+        #if the given genomes have contigs within scaffolds
         if len(refQuastResults[0]) == 3 and len(queryQuastResults[0]) == 3:    
             file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
             file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
