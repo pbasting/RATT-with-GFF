@@ -10,16 +10,16 @@ This pipeline was designed for use on linux operating systems.
 ## PREREQUISITE:
 
 
-NBISweden/EMBLmyGFF3 (and all prerequisites)
+**NBISweden/EMBLmyGFF3** (and all prerequisites)
   - https://github.com/NBISweden/EMBLmyGFF3
   
-Rapid Annotation Transfer Tool(RATT) (and all prerequisites)
+**Rapid Annotation Transfer Tool(RATT)** (and all prerequisites)
   - http://ratt.sourceforge.net/download.html
   
-The European Molecular Biology Open Software Suite (EMBOSS)
+**The European Molecular Biology Open Software Suite (EMBOSS)**
   - http://emboss.open-bio.org/html/adm/ch01s01.html
   
-Quality Assesment Tools for Genome Assemblies (QUAST)
+**Quality Assesment Tools for Genome Assemblies (QUAST)**
  - http://bioinf.spbau.ru/en/quast
  
 #### NOTE FOR UGA USERS:
