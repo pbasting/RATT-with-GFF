@@ -458,7 +458,11 @@ def removeAttribute(line, attribute):
                 newLine = newLine[:len(newLine)-1] #removes tailing ";"
             newLine = newLine+"\n" #adds missing endline
 
-        return newLine
+        if newLine.find(attribute) != -1:
+            newLine = removeAttribute(newLine, attribute) #runs recursively until all of the given attribute are removed
+            return newLine
+        else:
+            return newLine
     
     else:
         return line
@@ -474,8 +478,8 @@ def cleanAttributes(lines):
     for line in lines:
         if (len(line) == 9):
             line[8] = removeAttribute(line[8],"locus_tag")
+            #while (line[8].find("note=") != -1): #removes all notes
             line[8] = removeAttribute(line[8],"note=")
-            line[8] = removeAttribute(line[8],"note=") #run twice to remove both notes
             line[8] = removeAttribute(line[8],"transl_table")
             line[8] = removeAttribute(line[8],"codon_start")
             line[8] = removeAttribute(line[8],"featflags")
