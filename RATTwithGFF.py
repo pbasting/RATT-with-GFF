@@ -5,7 +5,7 @@ import sys
 
 def main():
     if (len(sys.argv) != 6):
-        sys.stderr.write('USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>')
+        sys.stderr.write('USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>\n')
         return
 
     gffFileName = sys.argv[1]
@@ -38,23 +38,23 @@ def main():
 #checks the input arguments to make sure they are vaid
 #called by main
 def validArgs(gff, fasta1, fasta2, transType):
-    print "checking for valid input files..."
+    print "\nchecking for valid input files..."
     with open(gff, "r") as gffFile:
         line = gffFile.readline()
         if (line.find("#gff-version 3") == -1):
-            sys.stderr.write('ERROR:first argument is not a gff file')
+            sys.stderr.write('ERROR: first argument is not a gff file\n')
             return False
 
     with open(fasta1, "r") as fastaFile:
         line = fastaFile.readline()
         if (line.find('>') == -1):
-            sys.stderr.write('ERROR:second argument is not a fasta file')
+            sys.stderr.write('ERROR: second argument is not a fasta file\n')
             return False
     
     with open(fasta2, "r") as fastaFile:
         line = fastaFile.readline()
         if (line.find('>') == -1):
-            sys.stderr.write('ERROR:second argument is not a fasta file')
+            sys.stderr.write('ERROR: second argument is not a fasta file\n')
             return False
     
     #these are the options for RATT transfer type
@@ -63,6 +63,8 @@ def validArgs(gff, fasta1, fasta2, transType):
         print "\ninput files are valid"
         return True
     else:
+        sys.stderr.write("ERROR: '"+transType+"' is not a valid RATT transfer type\n")
+        sys.stderr.write('VALID TRANSFER TYPES: Assembly, Assembly.Repetative, Strain, Strain.Repetative, Species, Species.Repetative, Multiple\n')
         return False
 
 #checks line ending format
@@ -97,7 +99,7 @@ def splitGenomicFiles(gff, fasta, contigNames):
     subprocess.call(["mkdir","contig_fasta"])
     subprocess.call(["mkdir","contig_embl"])
 
-    print "Generating contig fastas and gffs..."
+    print "\nGenerating contig fastas and gffs..."
     for contig in contigNames:
         output = subprocess.check_output(["samtools","faidx", fasta, contig]) #gets sequence specific for a contig
         
@@ -227,7 +229,7 @@ def cleanEmbl(contig):
 #also creates directories to organize the RATT output files
 #called by main
 def runRatt(subFa,queryFa, sampleID, parameter):
-    print "***RUNNING RATT....."
+    print "\n***RUNNING RATT....."
     subprocess.call(["mkdir",ratt_dir]) #makes directory where the ratt results are stored
     subprocess.call(["quast.py","-o",ratt_dir+"/ref_quast","--fast","-s","--silent",subFa])
     subprocess.call(["quast.py","-o",ratt_dir+"/query_quast","--fast","-s","--silent",queryFa])
@@ -247,7 +249,7 @@ def runRatt(subFa,queryFa, sampleID, parameter):
 #generates a new genomic gff by combining the annotations from all contigs
 #calculates the transfer stats for each feature
 def processRattResults(origGff):
-    print "processing RATT results..."
+    print "\nprocessing RATT results..."
     genomicGff = ratt_dir+"/final_gff/genomic.final.gff"
     with open(genomicGff,"w") as genomic:
         genomic.write("##gff-version 3\n")
@@ -257,7 +259,7 @@ def processRattResults(origGff):
         outFile = ratt_dir+"/final_gff/"+embl[:embl.find(".embl")]+".gff"
         temp = "temp01.gff"
         emblToGff(ratt_dir+"/final_embl/"+embl)
-        print "Fixing embl-gff conversion errors in: "+outFile
+        print "\nFixing embl-gff conversion errors in: "+outFile
         gffLines = parseGff(temp)
         gffLines = fixBiologicalRegions(gffLines)
         gffLines = cleanChromAndSource(gffLines)
@@ -273,7 +275,7 @@ def processRattResults(origGff):
 
 #calls seqret function to convert embl to gff
 def emblToGff(fileName):
-    print "converting: "+fileName+" to gff..."
+    print "\nconverting: "+fileName+" to gff..."
     subprocess.call(["seqret", "-sequence", fileName, "-feature",\
     "-fformat", "embl", "-fopenfile", fileName, "-osformat", "gff",\
     "-osname", "temp01", "-auto"])
@@ -517,7 +519,7 @@ def writeToFile(lines,outFileName):
 
 #adds the annotations from a contig gff to the genomic gff
 def addToGenomicGff(inputGff,genomicGff):
-    print "adding: "+inputGff+" annotations to: "+genomicGff
+    print "\nadding: "+inputGff+" annotations to: "+genomicGff
     with open(inputGff, 'r') as inFile:
         with open(genomicGff, 'a') as outFile:
             for line in inFile:
@@ -558,7 +560,10 @@ def parseQuast(results):
     with open(results) as file:
         for line in file:
             row = line.split("\t")
-            row[2] = row[2][:len(row[2])-1]
+            if (len(row) == 3):
+                row[2] = row[2][:len(row[2])-1]
+            else:
+                row[1] = row[1][:len(row[1])-1]
             table.append(row)
     return table
     
@@ -577,12 +582,20 @@ def writeStatsToFile(oCounts,fCounts, names):
             #file.write(",")
             #file.write(str(len(fCounts[x]) - len(oCounts[x])))
             file.write("\n")
+        
         file.write("Assembly Length,"+refQuastResults[15][1]+","+queryQuastResults[15][1]+"\n")
-        file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
-        file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
+
+        if len(refQuastResults[0]) == 3 and len(queryQuastResults[0]) == 3:    
+            file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+            file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
+        else:
+            file.write("Contigs,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+
         file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
         file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
         file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
+
+            
 
 main()
 
