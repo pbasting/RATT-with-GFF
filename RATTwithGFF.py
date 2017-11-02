@@ -8,7 +8,7 @@ def main():
     startTime = timeit.default_timer()
     if (len(sys.argv) != 6):
         sys.stderr.write('USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>\n')
-        return
+        return 0
 
     gffFileName = sys.argv[1]
     fastaFileName = sys.argv[2]
@@ -24,18 +24,35 @@ def main():
         gffFileName = fixLineEndings(gffFileName)
         fastaFileName = fixLineEndings(fastaFileName)
         queryFastaFile = fixLineEndings(queryFastaFile)
-
-        splitGenomicFiles(gffFileName, fastaFileName, contigs)
-        gffsToEmbls(contigs)
+        try:
+            splitGenomicFiles(gffFileName, fastaFileName, contigs)
+        except OSError:
+            sys.stderr.write("***********************************************************************************\n")
+            sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+            sys.stderr.write('OSError: Could not parse reference files, check that samtools is installed properly\n')
+            sys.stderr.write("***********************************************************************************\n")
+            return 0
+        
+        try:
+            gffsToEmbls(contigs)
+        except OSError:
+            sys.stderr.write("***********************************************************************************\n")
+            sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+            sys.stderr.write('OSError: Could not convert gff to embl, check that EMBLmyGFF is installed properly\n')
+            sys.stderr.write("***********************************************************************************\n")
+            return 0
         
         global ratt_dir 
+        
         ratt_dir = sampleID+"_RATT" #this is the directory that the ratt results will be stored
         
-        runRatt(fastaFileName,queryFastaFile, sampleID, rattType)
-        processRattResults(gffFileName)
-        subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
-        elapsedTime = (timeit.default_timer() - startTime)/60
-        print("<RATTwithGFF.py> COMPLETE in "+format(elapsedTime,'.2f')+" minutes")
+        ratt_worked = runRatt(fastaFileName,queryFastaFile, sampleID, rattType)
+        if (ratt_worked == True):
+            processResults_worked = processRattResults(gffFileName)
+            if (processResults_worked == True):
+                subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
+                elapsedTime = (timeit.default_timer() - startTime)/60
+                print("<RATTwithGFF.py> COMPLETE in "+format(elapsedTime,'.2f')+" minutes")
     else:
         return 0
 
@@ -233,11 +250,28 @@ def cleanEmbl(contig):
 #also creates directories to organize the RATT output files
 #called by main
 def runRatt(subFa,queryFa, sampleID, parameter):
-    print "\n***RUNNING RATT....."
+    print "\n***RUNNING QUAST on both sequences....."
     subprocess.call(["mkdir",ratt_dir]) #makes directory where the ratt results are stored
-    subprocess.call(["quast.py","-o",ratt_dir+"/ref_quast","--fast","-s","--silent",subFa])
-    subprocess.call(["quast.py","-o",ratt_dir+"/query_quast","--fast","-s","--silent",queryFa])
-    subprocess.call(["start.ratt.sh","../contig_embl","../"+queryFa, sampleID, parameter],cwd=ratt_dir)
+    try:
+        subprocess.call(["quast.py","-o",ratt_dir+"/ref_quast","--fast","-s","--silent",subFa])
+        subprocess.call(["quast.py","-o",ratt_dir+"/query_quast","--fast","-s","--silent",queryFa])
+    except OSError:
+        sys.stderr.write("***********************************************************************************\n")
+        sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+        sys.stderr.write("OSError: Could not call QUAST, Check that it is installed correctly\n")
+        sys.stderr.write("***********************************************************************************\n")
+        return False
+
+    print "\n***RUNNING RATT....."
+    try:
+        subprocess.call(["start.ratt.sh","../contig_embl","../"+queryFa, sampleID, parameter],cwd=ratt_dir)
+    except OSError:
+        sys.stderr.write("***********************************************************************************\n")
+        sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+        sys.stderr.write("OSError: could not call RATT, check that RATT is installed correctly\n")
+        sys.stderr.write("***********************************************************************************\n")
+        return False
+    
     subprocess.call(["mkdir","final_embl","Report_gff","Report_txt","NOTTransfered_embl","nucmer","tmp2_embl","uncorrected_embl","final_gff"],cwd=ratt_dir)
     subprocess.call(["mv *.final.embl final_embl"], shell=True, cwd=ratt_dir)
     subprocess.call(["mv *.Report.gff Report_gff"], shell=True, cwd=ratt_dir)
@@ -246,6 +280,7 @@ def runRatt(subFa,queryFa, sampleID, parameter):
     subprocess.call(["mv nucmer.* nucmer"], shell=True, cwd=ratt_dir)
     subprocess.call(["mv *tmp2.embl tmp2_embl"], shell=True, cwd=ratt_dir)
     subprocess.call(["mv *.embl uncorrected_embl"], shell=True, cwd=ratt_dir)
+    return True
 
 
 #converts the RATT results from EMBL to gff using EMBOSS seqret
@@ -262,7 +297,15 @@ def processRattResults(origGff):
     for embl in embls:
         outFile = ratt_dir+"/final_gff/"+embl[:embl.find(".embl")]+".gff"
         temp = "temp01.gff"
-        emblToGff(ratt_dir+"/final_embl/"+embl)
+        try:
+            emblToGff(ratt_dir+"/final_embl/"+embl)
+        except OSError:
+            sys.stderr.write("***********************************************************************************\n")
+            sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+            sys.stderr.write("OSError: Could not call EMBOSS seqret, make sure EMBOSS is installed correctly\n")
+            sys.stderr.write("***********************************************************************************\n")
+            return False
+
         print "\nFixing embl-gff conversion errors in: "+outFile
         gffLines = parseGff(temp)
         gffLines = fixBiologicalRegions(gffLines)
@@ -276,6 +319,7 @@ def processRattResults(origGff):
         addToGenomicGff(outFile,genomicGff)
     
     makeTransferStats(origGff,genomicGff)
+    return True
 
 #calls seqret function to convert embl to gff
 def emblToGff(fileName):
@@ -487,6 +531,7 @@ def cleanAttributes(lines):
             line[8] = removeAttribute(line[8],"transl_table")
             line[8] = removeAttribute(line[8],"codon_start")
             line[8] = removeAttribute(line[8],"featflags")
+            line[8] = line[8].replace("standard_name=","Name=")
             if (line[2] == "ncRNA"):
                 line[8] = fixNcRNAClass(line[8])        
     return lines
