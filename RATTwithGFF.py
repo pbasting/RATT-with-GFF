@@ -61,9 +61,10 @@ def main():
         if (ratt_worked == True):
             processResults_worked = processRattResults(gffFileName)
             if (processResults_worked == True):
+                printTransferStats()
                 subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
                 elapsedTime = (timeit.default_timer() - startTime)/60
-                print("<RATTwithGFF.py> COMPLETE in "+format(elapsedTime,'.2f')+" minutes")
+                print("\n<RATTwithGFF.py> COMPLETE in "+format(elapsedTime,'.2f')+" minutes")
     else:
         return 0
 
@@ -379,7 +380,7 @@ def fixBiologicalRegions(lines):
     x = 0
     newLines = []
     while (x < len(lines)):
-    
+        #I have to check length of lines to distinguish between header and actual feature lines
         if((len(lines[x]) == 9) and (lines[x][2] == "biological_region") and 
         (lines[x][8].find("featflags=type:CDS") != -1)):
             bio_reg = x
@@ -483,7 +484,7 @@ def fixCdsPhase(lines):
                     phase = getPhase(lines,x,phase)
                     lines[x][7] = phase
                     x+=1
-            else:
+            else: #CDS phase on opposite strand must be calculated bottom->top
                 negCDS = []
                 while (len(lines[x]) == 9 and lines[x][2] == "CDS"):
                     negCDS.append(x)
@@ -659,6 +660,16 @@ def writeStatsToFile(oCounts,fCounts, names):
         file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
 
             
+def printTransferStats():
+    print "\nRATT TRANSFER STATISTICS"
+    statsFile = ratt_dir+"/transferStats.csv"
+    with open(statsFile) as stats:
+        for line in stats:
+            vals = line.split(",")
+            spaces1 = (20-len(vals[0]))*' '
+            spaces2 = (20-len(vals[1]))*' '
+            output = vals[0]+spaces1+vals[1]+spaces2+vals[2]
+            sys.stdout.write(output)
 
 main()
 
