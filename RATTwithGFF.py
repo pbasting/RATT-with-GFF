@@ -1,5 +1,16 @@
 #!/usr/bin/env python2.7
 
+##############################################################################################################
+# RATTwithGFF.py                                                                                             #
+# Author: Preston Basting                                                                                    #
+# Last Changed 11/02/17                                                                                      #
+# Contact: pjb68507@uga.edu                                                                                  #
+# Function: This program is designed to run the rapid annotation transfer tool (RATT) using gff as input.    #
+#   RATT is a tool for transferrin annotations from one genome to another. Normally, RATT requires embl as   #
+#   the annotation format. This program uses other scripts to handle the file conversions and corrects for   #
+#   the errors that often occur. Produces  gff files as output.                                              #
+##############################################################################################################
+
 import subprocess
 import sys
 import timeit
