@@ -18,7 +18,7 @@ import timeit
 def main():
     startTime = timeit.default_timer()
     if (len(sys.argv) != 6):
-        sys.stderr.write('USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>\n')
+        sys.stderr.write('<RATTwithGFF.py>USAGE ERROR: SetupEmbls.py <reference gff> <reference fasta> <query fasta> <runID> <Transfer type>\n')
         return 0
 
     gffFileName = sys.argv[1]
@@ -71,7 +71,7 @@ def main():
 #checks the input arguments to make sure they are vaid
 #called by main
 def validArgs(gff, fasta1, fasta2, transType):
-    print "\nchecking for valid input files..."
+    print "\n<RATTwithGFF.py> checking for valid input files..."
     with open(gff, "r") as gffFile:
         line = gffFile.readline()
         if (line.find("#gff-version 3") == -1):
@@ -93,7 +93,7 @@ def validArgs(gff, fasta1, fasta2, transType):
     #these are the options for RATT transfer type
     validTypes = ["Assembly", "Assembly.Repetative", "Strain", "Strain.Repetative", "Species", "Species.Repetative", "Multiple"]
     if transType in validTypes:
-        print "\ninput files are valid"
+        print "\n<RATTwithGFF.py> input files are valid"
         return True
     else:
         sys.stderr.write("ERROR: '"+transType+"' is not a valid RATT transfer type\n")
@@ -120,7 +120,7 @@ def fixLineEndings(fileName):
 #converts a genoic fasta into a fasta for each contig
 #called by main
 def splitGenomicFiles(gff, fasta, contigNames):
-    print "\nIndexing fasta.."
+    print "\n<RATTwithGFF.py> Indexing fasta.."
     subprocess.call(["samtools","faidx",fasta])
     index = fasta+".fai"
     
@@ -132,7 +132,7 @@ def splitGenomicFiles(gff, fasta, contigNames):
     subprocess.call(["mkdir","contig_fasta"])
     subprocess.call(["mkdir","contig_embl"])
 
-    print "\nGenerating contig fastas and gffs..."
+    print "\n<RATTwithGFF.py> Generating contig fastas and gffs..."
     for contig in contigNames:
         output = subprocess.check_output(["samtools","faidx", fasta, contig]) #gets sequence specific for a contig
         
@@ -153,7 +153,7 @@ def splitGenomicFiles(gff, fasta, contigNames):
 #adds notes that include the original parents
 #called by main        
 def addInfoToGff(contig, gff):
-    print "\nadding ncRNA_class=other to "+contig+".gff"
+    print "\n<RATTwithGFF.py> adding ncRNA_class=other to "+contig+".gff"
     output = 'contig_gff/'+contig+".gff"
     with open(gff) as gffFile:
         with open(output, "w") as outputFile:
@@ -178,7 +178,7 @@ def addInfoToGff(contig, gff):
 #called by main
 def gffsToEmbls(contigNames):
     for contig in contigNames:
-        print "\nconverting "+contig+".gff to "+contig+".embl...."
+        print "\n<RATTwithGFF.py> converting "+contig+".gff to "+contig+".embl...."
         subprocess.call(["EMBLmyGFF3.py",\
                             "contig_gff/"+contig+".gff",\
                             "contig_fasta/"+contig+".fa",\
@@ -262,7 +262,7 @@ def cleanEmbl(contig):
 #also creates directories to organize the RATT output files
 #called by main
 def runRatt(subFa,queryFa, sampleID, parameter):
-    print "\n***RUNNING QUAST on both sequences....."
+    print "\n<RATTwithGFF.py>***RUNNING QUAST on both sequences....."
     subprocess.call(["mkdir",ratt_dir]) #makes directory where the ratt results are stored
     try:
         subprocess.call(["quast.py","-o",ratt_dir+"/ref_quast","--fast","-s","--silent",subFa])
@@ -274,7 +274,7 @@ def runRatt(subFa,queryFa, sampleID, parameter):
         sys.stderr.write("***********************************************************************************\n")
         return False
 
-    print "\n***RUNNING RATT....."
+    print "\n<RATTwithGFF.py>***RUNNING RATT....."
     try:
         subprocess.call(["start.ratt.sh","../contig_embl","../"+queryFa, sampleID, parameter],cwd=ratt_dir)
     except OSError:
@@ -300,7 +300,7 @@ def runRatt(subFa,queryFa, sampleID, parameter):
 #generates a new genomic gff by combining the annotations from all contigs
 #calculates the transfer stats for each feature
 def processRattResults(origGff):
-    print "\nprocessing RATT results..."
+    print "\n<RATTwithGFF.py> processing RATT results..."
     genomicGff = ratt_dir+"/final_gff/genomic.final.gff"
     with open(genomicGff,"w") as genomic:
         genomic.write("##gff-version 3\n")
@@ -318,7 +318,7 @@ def processRattResults(origGff):
             sys.stderr.write("***********************************************************************************\n")
             return False
 
-        print "\nFixing embl-gff conversion errors in: "+outFile
+        print "\n<RATTwithGFF.py> Fixing embl-gff conversion errors in: "+outFile
         gffLines = parseGff(temp)
         gffLines = fixBiologicalRegions(gffLines)
         gffLines = cleanChromAndSource(gffLines)
@@ -335,7 +335,7 @@ def processRattResults(origGff):
 
 #calls seqret function to convert embl to gff
 def emblToGff(fileName):
-    print "\nconverting: "+fileName+" to gff..."
+    print "\n<RATTwithGFF.py> converting: "+fileName+" to gff..."
     subprocess.call(["seqret", "-sequence", fileName, "-feature",\
     "-fformat", "embl", "-fopenfile", fileName, "-osformat", "gff",\
     "-osname", "temp01", "-auto"])
@@ -656,7 +656,7 @@ def writeStatsToFile(oCounts,fCounts, names):
 
 #outputs the transfer stats to stdout            
 def printTransferStats():
-    print "\nRATT TRANSFER STATISTICS"
+    print "\n<RATTwithGFF.py> RATT TRANSFER STATISTICS"
     statsFile = ratt_dir+"/transferStats.csv"
     with open(statsFile) as stats:
         for line in stats:
