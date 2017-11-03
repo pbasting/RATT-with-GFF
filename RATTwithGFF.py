@@ -58,9 +58,9 @@ def main():
         ratt_dir = sampleID+"_RATT" #this is the directory that the ratt results will be stored
         
         ratt_worked = runRatt(fastaFileName,queryFastaFile, sampleID, rattType)
-        if (ratt_worked == True):
+        if (ratt_worked):
             processResults_worked = processRattResults(gffFileName)
-            if (processResults_worked == True):
+            if (processResults_worked):
                 printTransferStats()
                 subprocess.call(["rm",gffFileName, fastaFileName, queryFastaFile]) #removes temporary files with fixed line endings
                 elapsedTime = (timeit.default_timer() - startTime)/60
@@ -193,7 +193,7 @@ def gffsToEmbls(contigNames):
                             "-r","1",\
                             "-a",contig,\
                             "--keep_duplicates",\
-                            "-v",\
+                            "-q",\
                             "--shame"])
         cleanEmbl(contig)
 
@@ -208,7 +208,7 @@ def containsStr(str1, str2):
 #checks if the line is wrapped info from the previous line
 #called by fixBrokenLines
 def isBrokenLine(line):
-    if (containsStr(line,"FT                   ") and containsStr(line, "/") == False):
+    if (containsStr(line,"FT                   ") and not containsStr(line, "/")):
         return True
     else:
         return False
@@ -527,12 +527,6 @@ def removeAttribute(line, attribute):
     else:
         return line
 
-#replaces ncrna_class with ncRNA_class
-def fixNcRNAClass(line):
-    if line.find("ncrna_class=") != 0:
-        newLine = line[:line.find("ncrna_class=")]+"ncRNA_class="
-        newLine = newLine+line[line.find("ncrna_class=")+12:]
-    return newLine
 
 #removes all attributes that are not needed
 def cleanAttributes(lines):
@@ -545,7 +539,7 @@ def cleanAttributes(lines):
             line[8] = removeAttribute(line[8],"featflags")
             line[8] = line[8].replace("standard_name=","Name=")
             if (line[2] == "ncRNA"):
-                line[8] = fixNcRNAClass(line[8])        
+                line[8] = line[8].replace("ncrna_class=","ncRNA_class=")        
     return lines
 
 #makes sure all CDS start and end positions are within mRNA start and end positions
@@ -580,7 +574,8 @@ def writeToFile(lines,outFileName):
     with open(outFileName, "w") as outFile:
         for line in range(0,len(lines)):
             newLine = "\t".join(lines[line])
-            outFile.write(newLine)
+            if (newLine.find("\tgap\t") ==-1): #removes gap features, it doesn't make sense to transfer gap annotations between assemblies
+                outFile.write(newLine)
 
 #adds the annotations from a contig gff to the genomic gff
 def addToGenomicGff(inputGff,genomicGff):
@@ -597,7 +592,7 @@ def addToGenomicGff(inputGff,genomicGff):
 #counts the amount of unique features in each category
 #generates a table that compares the original feature counts to the counts in the final output
 def makeTransferStats(originalGFF, newGFF):
-    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","gap","total features"]
+    nameArray = ["CDS","exon","gene","mRNA","tRNA","ncRNA","rRNA","total features"]
     origCounts = countUniqueOccurences(originalGFF,nameArray)
     finalCounts = countUniqueOccurences(newGFF,nameArray)
     writeStatsToFile(origCounts,finalCounts, nameArray)
@@ -659,7 +654,7 @@ def writeStatsToFile(oCounts,fCounts, names):
         file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
         file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
 
-            
+#outputs the transfer stats to stdout            
 def printTransferStats():
     print "\nRATT TRANSFER STATISTICS"
     statsFile = ratt_dir+"/transferStats.csv"
