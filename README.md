@@ -7,7 +7,7 @@ This pipeline is designed to use existing file conversion tools in order to run 
 
 This pipeline was designed for use on linux operating systems.
 
-## PREREQUISITE:
+## EXTERNAL DEPENDENCIES:
 
 
 **NBISweden/EMBLmyGFF3** (and all prerequisites)
