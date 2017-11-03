@@ -647,10 +647,11 @@ def writeStatsToFile(oCounts,fCounts, names):
         if len(refQuastResults[0]) == 3 and len(queryQuastResults[0]) == 3:    
             file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
             file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
+            file.write("Ns per 100kbp,"+refQuastResults[20][2]+","+queryQuastResults[20][2]+"\n")
         else:
             file.write("Contigs,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+            file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
 
-        file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
         file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
         file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
 
