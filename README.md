@@ -40,7 +40,7 @@ Requires all files be in the same directory that you are running the script from
 - valid Transfer-Type options: Assembly, Assembly.Repetitive, Strain, Strain.Repetitive, Species, Species.Repetitive, Multiple 
 - See for more info on RATT parameters: http://ratt.sourceforge.net/documentation.html
   
-### EXAMPLE
+#### EXAMPLE
 > ./RATTwithGFF.py ref.gff ref.fasta query.fasta refToQuery Strain
 
 ## OUTPUT:
