@@ -91,13 +91,13 @@ def validArgs(gff, fasta1, fasta2, transType):
             return False
     
     #these are the options for RATT transfer type
-    validTypes = ["Assembly", "Assembly.Repetative", "Strain", "Strain.Repetative", "Species", "Species.Repetative", "Multiple"]
+    validTypes = ["Assembly", "Assembly.Repetitive", "Strain", "Strain.Repetitive", "Species", "Species.Repetitive", "Multiple"]
     if transType in validTypes:
         print "\n<RATTwithGFF.py> input files are valid"
         return True
     else:
         sys.stderr.write("ERROR: '"+transType+"' is not a valid RATT transfer type\n")
-        sys.stderr.write('VALID TRANSFER TYPES: Assembly, Assembly.Repetative, Strain, Strain.Repetative, Species, Species.Repetative, Multiple\n')
+        sys.stderr.write('VALID TRANSFER TYPES: Assembly, Assembly.Repetitive, Strain, Strain.Repetitive, Species, Species.Repetitive, Multiple\n')
         return False
 
 #checks line ending format
