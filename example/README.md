@@ -32,7 +32,7 @@
 1. While in the directory with the example sequence and annotation, execute RATTwithGFF.py with
     the following command:
     
-    ../RATTwithGFF.py CM000429.1.gff CM000429.1.fa CM000429.1.fa example Assembly
+    `../RATTwithGFF.py CM000429.1.gff CM000429.1.fa CM000429.1.fa example Assembly`
 
     This will run the script and attempt to transfer the annotations back to the same sequence.
     If everything is running correctly, nearly all of the features should be transferred
@@ -40,7 +40,7 @@
 2. when the run is complete (~5 min), you can check the transfer statistics by changing directories
     to example_RATT/ and calling the command:
     
-    head -20 transferStats.csv
+    `head -20 transferStats.csv`
 
     This will tell you the number of features in the starting and ending annotation files as well
     as some information regarding the quality of the assemblies. 
@@ -54,7 +54,7 @@
     and the genome sequence that you wish to transfer the annotations to.
 2. Execute the RATTwithGFF.py script using this command:
 
-    /<path_to_script>/RATTwithGFF.py <ref_annotation.gff> <ref_sequence.fasta> <query_sequence.fasta> <run ID> <Transfer Type>
+    `/<path_to_script>/RATTwithGFF.py <ref_annotation.gff> <ref_sequence.fasta> <query_sequence.fasta> <run ID> <Transfer Type>`
 
     The run ID can be any string that you wish to use as an identifier for the following run.
     The script will use this ID to name the RATT output directory
