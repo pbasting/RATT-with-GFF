@@ -1,0 +1,73 @@
+# RATTwithGFF.py Example
+## INSTALL DEPENDENCIES
+
+1. Follow the links provided in the RATT-with-GFF README.md under PREREQUISITES
+    to install the programs that RATTwithGFF.py is dependent upon
+    
+    a. you will need to install:
+        *EMBLmyGFF3
+        *Rapid Annotation Transfer Tool (RATT)
+        *The European Molecular Biology Open Software Suite (EMBOSS)
+        *Quality Assesment Tools for Genome Assemblies (QUAST)
+
+    b. once installed, make sure each of these programs can be called from anywhere
+        without having to give the absolute path. If you cannot, add the absolute path to
+        each script to your PATH vaiable in .bashrc in your home directory and open a 
+        new terminal
+
+2. Clone the RATT-with-GFF repository to your computer
+
+3. Change directory to RATT-with-GFF/example/
+    a. within this directory, a Cryptosporidium Parvum chromosome sequence (.fa) and
+        annoutation (.gff) are provided.
+
+4. make sure you can call each dependency from this directory
+    a. try inputing EMBLmyGFF3.py, start.ratt.sh, seqret, and quast.py into your terminal
+        if the script is not found, add the absolute path to each script to your PATH variable in .bashrc
+        in your home directory and open a new terminal
+
+
+## Running RATTwithGFF.py with Examples
+
+1. While in the directory with the example sequence and annotation, execute RATTwithGFF.py with
+    the following command:
+    
+    ../RATTwithGFF.py CM000429.1.gff CM000429.1.fa CM000429.1.fa example Assembly
+
+    This will run the script and attempt to transfer the annotations back to the same sequence.
+    If everything is running correctly, nearly all of the features should be transferred
+        
+2. when the run is complete (~5 min), you can check the transfer statistics by changing directories
+    to example_RATT/ and calling the command:
+    
+    head -20 transferStats.csv
+
+    This will tell you the number of features in the starting and ending annotation files as well
+    as some information regarding the quality of the assemblies. 
+
+    The newly generated annotation files will be located in example_RATT/final_gff
+
+
+## Running RATTwithGFF.py with your Assemblies and Annotations
+
+1. Make a directory that contains your reference genome sequence, your reference annotation file
+    and the genome sequence that you wish to transfer the annotations to.
+2. Execute the RATTwithGFF.py script using this command:
+
+    /<path_to_script>/RATTwithGFF.py <ref_annotation.gff> <ref_sequence.fasta> <query_sequence.fasta> <run ID> <Transfer Type>
+
+    The run ID can be any string that you wish to use as an identifier for the following run.
+    The script will use this ID to name the RATT output directory
+
+    The transfer type will tell the RATT program what parameters you wish to use. This usually
+    depends on how the reference and query organisms are related.
+    
+    Valid transfer types: Assembly, Assembly.Repetative, Strain, Strain.Repetative, Species,
+        Species.Repetative, Multiple
+
+
+## Examining Results
+
+The transferred annotations can be found in the <runID>_RATT/final_gff directory. Each scaffold/contig will have its own gff.
+There will also be a combined gff called genomic.final.gff. These files can now be loaded into a genome browser like Artemis
+for examination. 

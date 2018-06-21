@@ -3,7 +3,7 @@
 ##############################################################################################################
 # RATTwithGFF.py                                                                                             #
 # Author: Preston Basting                                                                                    #
-# Last Changed 11/02/17                                                                                      #
+# Last Changed 06/21/18                                                                                      #
 # Contact: pjb68507@uga.edu                                                                                  #
 # Function: This program is designed to run the rapid annotation transfer tool (RATT) using gff as input.    #
 #   RATT is a tool for transferrin annotations from one genome to another. Normally, RATT requires embl as   #
@@ -46,11 +46,12 @@ def main():
         
         try:
             gffsToEmbls(contigs)
-        except OSError:
+        except OSError as e:
             sys.stderr.write("***********************************************************************************\n")
             sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
             sys.stderr.write('OSError: Could not convert gff to embl, check that EMBLmyGFF is installed properly\n')
             sys.stderr.write("***********************************************************************************\n")
+            print str(e)
             return 0
         
         global ratt_dir 
@@ -179,10 +180,11 @@ def addInfoToGff(contig, gff):
 def gffsToEmbls(contigNames):
     for contig in contigNames:
         print "\n<RATTwithGFF.py> converting "+contig+".gff to "+contig+".embl...."
-        subprocess.call(["EMBLmyGFF3.py",\
+        subprocess.call(["EMBLmyGFF3",\
                             "contig_gff/"+contig+".gff",\
                             "contig_fasta/"+contig+".fa",\
                             "-o", "contig_embl/"+contig+"_tmp1.embl",\
+                            "-i", "tag",\
                             "-p", contig,\
                             "-s", "unknown",\
                             "-t", "linear",\
@@ -533,7 +535,7 @@ def cleanAttributes(lines):
     for line in lines:
         if (len(line) == 9):
             line[8] = removeAttribute(line[8],"locus_tag")
-            line[8] = removeAttribute(line[8],"note=")
+            # line[8] = removeAttribute(line[8],"note=")
             line[8] = removeAttribute(line[8],"transl_table")
             line[8] = removeAttribute(line[8],"codon_start")
             line[8] = removeAttribute(line[8],"featflags")
@@ -629,8 +631,8 @@ def parseQuast(results):
     
 #writes out the unique feature count data as a comma-delimited file
 def writeStatsToFile(oCounts,fCounts, names):
-    refQuastResults = parseQuast(ratt_dir+"/ref_quast/report.tsv")
-    queryQuastResults = parseQuast(ratt_dir+"/query_quast/report.tsv")
+    # refQuastResults = parseQuast(ratt_dir+"/ref_quast/report.tsv")
+    # queryQuastResults = parseQuast(ratt_dir+"/query_quast/report.tsv")
     with open(ratt_dir+"/transferStats.csv","w") as file:
         file.write("Feat.,Orig.,Final\n")
         for x in range(0,len(names)):
@@ -641,19 +643,19 @@ def writeStatsToFile(oCounts,fCounts, names):
             file.write(str(len(fCounts[x])))
             file.write("\n")
         
-        file.write("Assembly Length,"+refQuastResults[15][1]+","+queryQuastResults[15][1]+"\n")
+        # file.write("Assembly Length,"+refQuastResults[15][1]+","+queryQuastResults[15][1]+"\n")
 
-        #if the given genomes have contigs within scaffolds
-        if len(refQuastResults[0]) == 3 and len(queryQuastResults[0]) == 3:    
-            file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
-            file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
-            file.write("Ns per 100kbp,"+refQuastResults[20][2]+","+queryQuastResults[20][2]+"\n")
-        else:
-            file.write("Contigs,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
-            file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
+        # #if the given genomes have contigs within scaffolds
+        # if len(refQuastResults[0]) == 3 and len(queryQuastResults[0]) == 3:    
+        #     file.write("Scaffolds,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+        #     file.write("Contigs,"+refQuastResults[13][2]+","+queryQuastResults[13][2]+"\n")
+        #     file.write("Ns per 100kbp,"+refQuastResults[20][2]+","+queryQuastResults[20][2]+"\n")
+        # else:
+        #     file.write("Contigs,"+refQuastResults[13][1]+","+queryQuastResults[13][1]+"\n")
+        #     file.write("Ns per 100kbp,"+refQuastResults[20][1]+","+queryQuastResults[20][1]+"\n")
 
-        file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
-        file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
+        # file.write("N50,"+refQuastResults[16][1]+","+queryQuastResults[16][1]+"\n")
+        # file.write("L50,"+refQuastResults[18][1]+","+queryQuastResults[18][1]+"\n")
 
 #outputs the transfer stats to stdout            
 def printTransferStats():
