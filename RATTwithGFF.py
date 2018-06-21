@@ -269,10 +269,10 @@ def runRatt(subFa,queryFa, sampleID, parameter):
         subprocess.call(["quast.py","-o",ratt_dir+"/query_quast","--fast","-s","--silent",queryFa])
     except OSError:
         sys.stderr.write("***********************************************************************************\n")
-        sys.stderr.write("<RATTwithGFF.py> FATAL-ERROR\n")
+        sys.stderr.write("<RATTwithGFF.py> ERROR\n")
         sys.stderr.write("OSError: Could not call QUAST, Check that it is installed correctly\n")
         sys.stderr.write("***********************************************************************************\n")
-        return False
+#         return False
 
     print "\n<RATTwithGFF.py>***RUNNING RATT....."
     try:
