@@ -193,7 +193,7 @@ def gffsToEmbls(contigNames):
                             "-x", "UNC",\
                             "--rg","none",\
                             "-r","1",\
-                            "-a",contig,\
+                            "-a",\
                             "--keep_duplicates",\
                             "-q",\
                             "--shame"])
